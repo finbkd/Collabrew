@@ -1,0 +1,73 @@
+{
+  "workbench.colorCustomizations": {
+    "titleBar.activeForeground": "#fff",
+    "titleBar.inactiveForeground": "#ffffffcc"
+    // "titleBar.activeBackground": "#b89",
+    // "titleBar.inactiveBackground": "#3F758DCC"
+  },
+  "files.exclude": {
+    "node_modules": true
+  },
+  "better-comments.tags": [
+    // MAIN HEADER - YELLOW BOLD = //T
+    // COMPONENT FUNCTION- GREEN BRIGHT = //B
+    // SEMI COMPONENT FUNCTION - GREEN LOW
+    // SPECIFIC LINE - BROWN LIGHT
+    // PERSONAL MESSAGE - GREY
+    // WARNING - RED - //!
+    // COMMENT - //.//
+
+    // FF0 - yellow
+    {
+      // MAIN HEADER
+      "tag": "a/",
+      "color": "#ebc033",
+      "strikethrough": false,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": false,
+      "italic": false
+    },
+    {
+      //COMPONENT FUNCTION
+      "tag": "b/",
+      "color": "#b38693",
+      "strikethrough": false,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": false,
+      "italic": false
+    },
+    {
+      //M SEMI COMPONENT
+      "tag": "c/",
+      "color": "#2874A6",
+      "strikethrough": false,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": false,
+      "italic": false
+    },
+    {
+      // PERSONAL MESSAGE
+      "tag": "P/",
+      "color": "#AF601A ",
+      // "color": "#884EA0 ",
+      "strikethrough": false,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": false,
+      "italic": false
+    },
+    {
+      // COMMENT
+      "tag": "//",
+      "color": "#474747",
+      "strikethrough": true,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": false,
+      "italic": false
+    }
+  ]
+}
