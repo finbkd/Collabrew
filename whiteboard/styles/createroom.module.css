@@ -1,0 +1,34 @@
+.pageContainer {
+  width: 100vw;
+  height: 100vh;
+  background-color: aliceblue;
+  display: flex;
+  align-items: center;
+}
+
+.roomContainer {
+  width: 30%;
+  height: 50%;
+  border-radius: 8px;
+  margin: 0 auto;
+  border: 2px solid black;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* justify-content: center; */
+}
+
+.header {
+  margin-top: 25px;
+  margin-bottom: 25px;
+  font-size: 25px;
+  font-weight: 800;
+}
+
+.input {
+  margin-bottom: 10px;
+}
+
+.submit {
+  background-color: cornflowerblue;
+}
