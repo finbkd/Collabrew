@@ -15,44 +15,39 @@ export default function Home() {
   const [drawing, setDrawing] = useState(false);
   const [options, setOptions] = useState("line");
   const [points, setPoints] = useState([]);
-  const [restorePoints, setRestorePoints] = useState([]);
 
   const [elements, setElements] = useState([]);
   const [pencil, setPencil] = useState([]);
+
+  const [otherUserElements, setOtherUserElements] = useState([]);
+  const [myUserElements, setMyUserElements] = useState([]);
 
   const canvasApi = useRef();
   const contextRef = useRef(null);
 
   useEffect(() => {
     socket.current.on("lineDrew", (x) => {
+      const { elements, otherUserElements } = x;
+
+      setOtherUserElements(elements);
+
       const ctx = canvasApi?.current?.getContext("2d");
       ctx.clearRect(0, 0, 950, 450);
       elements.forEach((ele) => actualine(ele.roughEle));
-      const { options, start1, start2, end1, end2 } = x;
-      if (options === "line") {
-        ctx.beginPath();
-        ctx.moveTo(start1, start2);
-        ctx.lineTo(end1, end2);
-        ctx.stroke();
-      }
-      if (options === "rectangle") {
-        ctx.beginPath();
-        ctx.rect(start1, start2, end1 - start1, end2 - start2);
-        ctx.stroke();
-      }
+      otherUserElements.forEach((ele) => actualine(ele.roughEle));
     });
   }, []);
 
   const actualine = (x) => {
+    if (!x) return;
     const { options, start1, start2, end1, end2 } = x;
+
     const ctx = canvasApi.current.getContext("2d");
     if (options === "line") {
-      // ctx.clearRect(0, 0, 950, 450);
       ctx.beginPath();
       ctx.moveTo(start1, start2);
       ctx.lineTo(end1, end2);
       ctx.stroke();
-      socket.current.emit("drawing", x);
     }
     if (options === "rectangle") {
       ctx.beginPath();
@@ -66,10 +61,15 @@ export default function Home() {
     if (options === "line") {
       ctx.clearRect(0, 0, 950, 450);
       elements.forEach((ele) => actualine(ele.roughEle));
+      otherUserElements.forEach((ele) => actualine(ele.roughEle));
+      socket.current.emit("drawing", { elements, otherUserElements });
     }
+
     if (options === "rectangle") {
-      // ctx.clearRect(0, 0, 950, 450);
+      ctx.clearRect(0, 0, 950, 450);
       elements.forEach((ele) => actualine(ele.roughEle));
+      otherUserElements.forEach((ele) => actualine(ele.roughEle));
+      socket.current.emit("drawing", { elements, otherUserElements });
     }
   }, [elements]);
 
@@ -117,6 +117,7 @@ export default function Home() {
         const copyElement = [...elements];
         copyElement[index] = updatedEle; //replacing last index
         setElements(copyElement);
+        setMyUserElements(copyElement);
       }
       if (options === "rectangle") {
         const { options, start1, start2 } = elements[index];
@@ -135,8 +136,6 @@ export default function Home() {
         const { clientX, clientY } = event;
         pos.x = clientX;
         pos.y = clientY;
-        restorePts.c = clientX;
-        restorePts.d = clientY;
       }
     }
   };
@@ -154,7 +153,7 @@ export default function Home() {
     }
     if (options === "pencil") {
       setDrawing(true);
-      socket.current.emit("drawing");
+      // socket.current.emit("drawing");
       // setinitialPosition([e.clientX, e.clientY]);
       const { clientX, clientY } = e;
       pos.x = clientX;
