@@ -5,6 +5,8 @@ import { socketInit } from "../context/socket";
 import styles from "../styles/Home.module.css";
 
 const pos = { x: 0, y: 0 };
+const restorePts = { a: 0, b: 0, c: 0, d: 0 };
+
 export default function Home() {
   const socket = useRef();
 
@@ -12,19 +14,22 @@ export default function Home() {
     socket.current = socketInit();
   }, []);
 
-  const [drawing, setDrawing] = useState(false);
-  const [options, setOptions] = useState("line");
+  const [restorepoints, setrestorePoints] = useState([]);
   const [points, setPoints] = useState([]);
 
-  const [elements, setElements] = useState([]);
-  const [pencil, setPencil] = useState([]);
+  const [pencilElements, setPencilElements] = useState([]);
 
+  const [drawing, setDrawing] = useState(false);
+  const [options, setOptions] = useState("pencil");
+
+  const [elements, setElements] = useState([]);
   const [otherUserElements, setOtherUserElements] = useState([]);
   const [myUserElements, setMyUserElements] = useState([]);
 
   const canvasApi = useRef();
   const contextRef = useRef(null);
 
+  //a/ SOCKET IO FOR OTHER USER
   useEffect(() => {
     socket.current.on("lineDrew", (x) => {
       const { elements, otherUserElements } = x;
@@ -38,6 +43,47 @@ export default function Home() {
     });
   }, []);
 
+  //a/ SOCKET IO FOR MY USER
+  useEffect(() => {
+    const ctx = canvasApi.current.getContext("2d");
+    if (options === "line") {
+      ctx.clearRect(0, 0, 950, 450);
+
+      pencilElements.forEach((elee) => {
+        elee.forEach((ele, i) => {
+          const newEle = elee[i + 1];
+          contextRef.current.moveTo(ele.clientX, ele.clientY);
+          contextRef.current.lineTo(newEle?.clientX, newEle?.clientY);
+          contextRef.current.stroke();
+          ctx.beginPath();
+        });
+      });
+
+      elements.forEach((ele) => actualine(ele.roughEle));
+      otherUserElements.forEach((ele) => actualine(ele.roughEle));
+      socket.current.emit("drawing", { elements, otherUserElements });
+    }
+
+    if (options === "rectangle") {
+      ctx.clearRect(0, 0, 950, 450);
+
+      pencilElements.forEach((elee) => {
+        elee.forEach((ele, i) => {
+          const newEle = elee[i + 1];
+          contextRef.current.moveTo(ele.clientX, ele.clientY);
+          contextRef.current.lineTo(newEle?.clientX, newEle?.clientY);
+          contextRef.current.stroke();
+          ctx.beginPath();
+        });
+      });
+
+      elements.forEach((ele) => actualine(ele.roughEle));
+      otherUserElements.forEach((ele) => actualine(ele.roughEle));
+      socket.current.emit("drawing", { elements, otherUserElements });
+    }
+  }, [elements]);
+
+  //a/ ACTUAl LINE
   const actualine = (x) => {
     if (!x) return;
     const { options, start1, start2, end1, end2 } = x;
@@ -56,32 +102,15 @@ export default function Home() {
     }
   };
 
+  //a/ PENCIL
   useEffect(() => {
     const ctx = canvasApi.current.getContext("2d");
-    if (options === "line") {
-      ctx.clearRect(0, 0, 950, 450);
-      elements.forEach((ele) => actualine(ele.roughEle));
-      otherUserElements.forEach((ele) => actualine(ele.roughEle));
-      socket.current.emit("drawing", { elements, otherUserElements });
-    }
-
-    if (options === "rectangle") {
-      ctx.clearRect(0, 0, 950, 450);
-      elements.forEach((ele) => actualine(ele.roughEle));
-      otherUserElements.forEach((ele) => actualine(ele.roughEle));
-      socket.current.emit("drawing", { elements, otherUserElements });
-    }
-  }, [elements]);
-
-  useEffect(() => {
-    const ctx = canvasApi.current.getContext("2d");
-    // ctx.clearRect(0, 0, 950, 450);
     if (options === "pencil") {
-      // ctx.clearRect(0, 0, 950, 450);
       ctx.lineCap = "round";
       ctx.strokeStyle = "black";
       ctx.lineWidth = 2;
       contextRef.current = ctx;
+
       points.forEach((ele) => {
         contextRef.current.lineTo(ele.x, ele.y);
         contextRef.current.stroke();
@@ -106,12 +135,13 @@ export default function Home() {
     return { options, start1, start2, end1, end2, roughEle };
   };
 
+  //a/ DRAWING
   const draw = (event) => {
     const ctx = canvasApi.current.getContext("2d");
     if (drawing) {
-      const { clientX, clientY } = event;
       const index = elements.length - 1;
       if (options === "line") {
+        const { clientX, clientY } = event;
         const { options, start1, start2 } = elements[index];
         const updatedEle = drawShape("line", start1, start2, clientX, clientY);
         const copyElement = [...elements];
@@ -120,6 +150,7 @@ export default function Home() {
         setMyUserElements(copyElement);
       }
       if (options === "rectangle") {
+        const { clientX, clientY } = event;
         const { options, start1, start2 } = elements[index];
         const updatedEle = drawShape("rectangle", start1, start2, clientX, clientY);
         const copyElement = [...elements];
@@ -128,18 +159,22 @@ export default function Home() {
       }
       if (options === "pencil") {
         contextRef.current = ctx;
-
         setPoints((state) => [...state, pos]);
-        // setPencil((state) => [...state, [points]]);
         contextRef.current.moveTo(pos.x, pos.y);
 
+        setrestorePoints((state) => [...state, { clientX, clientY }]);
+
         const { clientX, clientY } = event;
+        restorePts.c = clientX;
+        restorePts.d = clientY;
+
         pos.x = clientX;
         pos.y = clientY;
       }
     }
   };
 
+  //a/ START
   const startDrawing = (e) => {
     if (options === "line") {
       setDrawing(true);
@@ -153,16 +188,19 @@ export default function Home() {
     }
     if (options === "pencil") {
       setDrawing(true);
-      // socket.current.emit("drawing");
-      // setinitialPosition([e.clientX, e.clientY]);
       const { clientX, clientY } = e;
       pos.x = clientX;
       pos.y = clientY;
+      restorePts.a = clientX;
+      restorePts.b = clientY;
     }
   };
 
+  //a/ END
   const finishDrawing = (e) => {
     setDrawing(false);
+    setPencilElements((state) => [...state, restorepoints]);
+    setrestorePoints([]);
   };
 
   const changeMode = (x) => {
