@@ -1,31 +1,62 @@
 .container {
-  padding: 0 2rem;
+  height: 100vh;
+  display: flex;
 }
 
 .code {
   background: #fafafa;
   border-radius: 5px;
-  padding: 0.75rem;
+  /* padding: 0.75rem; */
   font-size: 1.1rem;
   font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
 }
 
+.canvasContainer {
+  width: 80%;
+}
+
 .canvas {
-  margin-top: 10px;
-  border: 1px solid black;
+  /* margin-top: 10px; */
+  /* border: 1px solid black; */
+  background-image: url("../public/images/backgroundimage.jpg");
+  height: 100vh;
+  width: 100%;
+  background-size: 100%;
+  image-orientation: revert-layer;
+  z-index: 9999;
 }
 
 .options {
-  display: flex;
+  position: fixed;
+  left: 20px;
+  top: 12rem;
+  background-color: blanchedalmond;
+  width: 70px;
+  height: 220px;
+  border-radius: 8px;
+  z-index: 9;
+  padding: 5px;
 }
 
-.options span {
-  padding-right: 10px;
+.optionIcon {
+  height: 20px;
+  width: 20px;
+  padding: 2px;
+}
+
+.active {
+  border: 1px royalblue solid;
+  border-radius: 3px;
 }
 
 .mode {
   font-weight: 500;
   font-size: 15px;
   text-transform: uppercase;
-  margin-left: 30px;
+  /* margin-left: 30px; */
+}
+
+.chatBox {
+  width: 20%;
+  background-color: aliceblue;
 }
