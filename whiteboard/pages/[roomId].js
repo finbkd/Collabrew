@@ -8,16 +8,19 @@ const restorePts = { a: 0, b: 0, c: 0, d: 0 };
 
 export default function Home() {
   const socket = useRef();
+  const [color, setColor] = useState("#000");
 
   useEffect(() => {
     socket.current = socketInit();
   }, []);
 
-  const [color, setColor] = useState("#000");
-  const [points, setPoints] = useState([]);
   const [restorepoints, setrestorePoints] = useState([]);
+  const [points, setPoints] = useState([]);
 
   const [pencilElements, setPencilElements] = useState([]);
+  const [otherpencilElements, setOtherPencilElements] = useState([]);
+
+  const [eraser, setEraser] = useState(false);
 
   const [drawing, setDrawing] = useState(false);
   const [options, setOptions] = useState("pencil");
@@ -34,22 +37,35 @@ export default function Home() {
   //a/ SOCKET IO FOR OTHER USER
   useEffect(() => {
     socket.current.on("lineDrew", (x) => {
-      const { elements, otherUserElements, pencilElements } = x;
+      const { elements, otherUserElements, pencilElements, otherpencilElements } = x;
+      // console.log(otherpencilElements);
 
       setOtherUserElements(elements);
+      setOtherPencilElements(pencilElements);
 
       const ctx = canvasApi?.current?.getContext("2d");
       ctx.clearRect(0, 0, 950, 450);
 
       elements.forEach((ele) => actualine(ele.roughEle));
       otherUserElements.forEach((ele) => actualine(ele.roughEle));
-      pencilElements?.forEach((elee) => {
-        elee.forEach((ele, i) => {
-          const newEle = elee[i + 1];
+      pencilElements.forEach((elee) => {
+        elee.restorepoints.forEach((ele, i) => {
+          contextRef.current.strokeStyle = elee.color;
+          const newEle = elee.restorepoints[i + 1];
+          contextRef.current.beginPath();
           contextRef.current.moveTo(ele.clientX, ele.clientY);
           contextRef.current.lineTo(newEle?.clientX, newEle?.clientY);
           contextRef.current.stroke();
-          ctx.beginPath();
+        });
+      });
+      otherpencilElements.forEach((elee) => {
+        elee.restorepoints.forEach((ele, i) => {
+          contextRef.current.strokeStyle = elee.color;
+          const newEle = elee.restorepoints[i + 1];
+          contextRef.current.beginPath();
+          contextRef.current.moveTo(ele.clientX, ele.clientY);
+          contextRef.current.lineTo(newEle?.clientX, newEle?.clientY);
+          contextRef.current.stroke();
         });
       });
     });
@@ -62,39 +78,63 @@ export default function Home() {
       ctx.clearRect(0, 0, 950, 450);
 
       pencilElements.forEach((elee) => {
-        elee.forEach((ele, i) => {
-          const newEle = elee[i + 1];
+        elee.restorepoints.forEach((ele, i) => {
+          contextRef.current.strokeStyle = elee.color;
+          const newEle = elee.restorepoints[i + 1];
+          contextRef.current.beginPath();
           contextRef.current.moveTo(ele.clientX, ele.clientY);
           contextRef.current.lineTo(newEle?.clientX, newEle?.clientY);
           contextRef.current.stroke();
-          ctx.beginPath();
+        });
+      });
+
+      otherpencilElements.forEach((elee) => {
+        elee.restorepoints.forEach((ele, i) => {
+          contextRef.current.strokeStyle = elee.color;
+          const newEle = elee.restorepoints[i + 1];
+          contextRef.current.beginPath();
+          contextRef.current.moveTo(ele.clientX, ele.clientY);
+          contextRef.current.lineTo(newEle?.clientX, newEle?.clientY);
+          contextRef.current.stroke();
         });
       });
 
       elements.forEach((ele) => actualine(ele.roughEle));
       otherUserElements.forEach((ele) => actualine(ele.roughEle));
-      socket.current.emit("drawing", { elements, otherUserElements, pencilElements });
+      socket.current.emit("drawing", { elements, otherUserElements, pencilElements, otherpencilElements });
     }
 
     if (options === "rectangle") {
       ctx.clearRect(0, 0, 950, 450);
 
       pencilElements.forEach((elee) => {
-        elee.forEach((ele, i) => {
-          const newEle = elee[i + 1];
+        elee.restorepoints.forEach((ele, i) => {
+          contextRef.current.strokeStyle = elee.color;
+          const newEle = elee.restorepoints[i + 1];
+          contextRef.current.beginPath();
           contextRef.current.moveTo(ele.clientX, ele.clientY);
           contextRef.current.lineTo(newEle?.clientX, newEle?.clientY);
           contextRef.current.stroke();
-          ctx.beginPath();
+        });
+      });
+
+      otherpencilElements.forEach((elee) => {
+        elee.restorepoints.forEach((ele, i) => {
+          contextRef.current.strokeStyle = elee.color;
+          const newEle = elee.restorepoints[i + 1];
+          contextRef.current.beginPath();
+          contextRef.current.moveTo(ele.clientX, ele.clientY);
+          contextRef.current.lineTo(newEle?.clientX, newEle?.clientY);
+          contextRef.current.stroke();
         });
       });
 
       elements.forEach((ele) => actualine(ele.roughEle));
       otherUserElements.forEach((ele) => actualine(ele.roughEle));
-      socket.current.emit("drawing", { elements, otherUserElements, pencilElements });
+      socket.current.emit("drawing", { elements, otherUserElements, pencilElements, otherpencilElements });
     }
     if (options === "pencil") {
-      socket.current.emit("drawing", { elements, otherUserElements, pencilElements });
+      socket.current.emit("drawing", { elements, otherUserElements, pencilElements, otherpencilElements });
     }
   }, [elements, pencilElements]);
 
@@ -125,11 +165,34 @@ export default function Home() {
     if (options === "pencil") {
       contextRef.current = ctx;
 
-      contextRef.current.strokeStyle = color;
+      if (eraser) {
+        // contextRef.current.globalCompositeOperation = "destination-out";
+        // contextRef.current.strokeStyle = "rgba(255,255,255,0.7)";
+      } else {
+        contextRef.current.globalCompositeOperation = "source-over";
+      }
+
       points.forEach((ele) => {
         contextRef.current.lineTo(ele.x, ele.y);
         contextRef.current.stroke();
       });
+
+      if (pencilElements.length !== 0) {
+        pencilElements.forEach((elee) => {
+          elee.restorepoints.forEach((ele, i) => {
+            contextRef.current.strokeStyle = elee.color;
+            const newEle = elee.restorepoints[i + 1];
+            contextRef.current.beginPath();
+            contextRef.current.moveTo(ele.clientX, ele.clientY);
+            contextRef.current.lineTo(newEle?.clientX, newEle?.clientY);
+            contextRef.current.stroke();
+          });
+        });
+
+        elements.forEach((ele) => actualine(ele.roughEle));
+
+        // contextRef.current.globalCompositeOperation = "source-over";
+      }
     }
   }, [points]);
 
@@ -213,18 +276,28 @@ export default function Home() {
       restorePts.a = clientX;
       restorePts.b = clientY;
     }
+    if (options === "eraser") {
+    }
   };
 
   //a/ END
   const finishDrawing = (e) => {
     setDrawing(false);
-    setPencilElements((state) => [...state, restorepoints]);
+    setPencilElements((state) => [...state, { color, restorepoints }]);
     setrestorePoints([]);
     setPoints([]);
   };
 
   const changeMode = (x) => {
     setOptions(x);
+    if (eraser) {
+      setEraser(false);
+    }
+  };
+
+  const eraserHandler = (x) => {
+    setEraser(true);
+    setOptions("pencil");
   };
 
   const colorPicker = () => {
@@ -243,12 +316,15 @@ export default function Home() {
             <img className={options === "rectangle" ? `${styles.optionIcon}   ${styles.active}` : `${styles.optionIcon}`} src="/icons/rectangle.png" />
           </div>
           <div onClick={() => changeMode("pencil")} className={styles.option}>
-            <img className={options === "pencil" ? `${styles.optionIcon}   ${styles.active}` : `${styles.optionIcon}`} src="/icons/pencil.png" />
+            <img className={options === "pencil" && !eraser ? `${styles.optionIcon}   ${styles.active}` : `${styles.optionIcon}`} src="/icons/pencil.png" />
           </div>
           <div className={styles.option}>
             <img onClick={colorPicker} className={options === "colorr" ? `${styles.optionIcon}   ${styles.active}` : `${styles.optionIcon}`} src="/icons/color-dropper.png" />
           </div>
           {colorPickerOption && <HexColorPicker color={color} onChange={setColor} />}
+          <div onClick={() => eraserHandler()} className={styles.option}>
+            <img className={options === "pencil" && eraser ? `${styles.optionIcon}   ${styles.active}` : `${styles.optionIcon}`} src="/icons/eraser.png" />
+          </div>
         </div>
       </div>
       <div className={styles.chatBox}>CHAT BOX</div>
