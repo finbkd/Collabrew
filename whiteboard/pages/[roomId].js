@@ -16,6 +16,9 @@ export default function Home() {
     socket.current = socketInit();
   }, []);
 
+  const [elementTypes, setElementTypes] = useState([]);
+  const [undoElementType, setUndoElementTypes] = useState([]);
+
   const [restorepoints, setrestorePoints] = useState([]);
   const [points, setPoints] = useState([]);
   const [changes, setChanges] = useState(false);
@@ -24,10 +27,12 @@ export default function Home() {
   const [otherpencilElements, setOtherPencilElements] = useState([]);
 
   const [undoElements, setUndoElements] = useState([]);
+  const [undopencilElements, setUndoPencilElements] = useState([]);
   const [elements, setElements] = useState([]);
   const [otherUserElements, setOtherUserElements] = useState([]);
   const [myUserElements, setMyUserElements] = useState([]);
   const [currentElements, setCurrentELements] = useState([]);
+  const [currentPencilElements, setCurrentPencilELements] = useState([]);
 
   const [eraser, setEraser] = useState(false);
   const [textInput, setTextInput] = useState(false);
@@ -198,6 +203,32 @@ export default function Home() {
       socket.current.emit("drawing", { elements, otherUserElements, pencilElements, otherpencilElements });
     }
     if (options === "pencil") {
+      ctx.clearRect(0, 0, 950, 450);
+
+      pencilElements.forEach((elee) => {
+        elee.restorepoints.forEach((ele, i) => {
+          contextRef.current.strokeStyle = elee.color;
+          const newEle = elee.restorepoints[i + 1];
+          contextRef.current.beginPath();
+          contextRef.current.moveTo(ele.clientX, ele.clientY);
+          contextRef.current.lineTo(newEle?.clientX, newEle?.clientY);
+          contextRef.current.stroke();
+        });
+      });
+
+      otherpencilElements.forEach((elee) => {
+        elee.restorepoints.forEach((ele, i) => {
+          contextRef.current.strokeStyle = elee.color;
+          const newEle = elee.restorepoints[i + 1];
+          contextRef.current.beginPath();
+          contextRef.current.moveTo(ele.clientX, ele.clientY);
+          contextRef.current.lineTo(newEle?.clientX, newEle?.clientY);
+          contextRef.current.stroke();
+        });
+      });
+
+      elements.forEach((ele) => actualine(ele.roughEle));
+      otherUserElements.forEach((ele) => actualine(ele.roughEle));
       socket.current.emit("drawing", { elements, otherUserElements, pencilElements, otherpencilElements });
     }
   }, [elements, pencilElements, changes]);
@@ -391,13 +422,22 @@ export default function Home() {
   //a/ END
   const finishDrawing = (e) => {
     setDrawing(false);
-    if (eraser) {
-      setPencilElements((state) => [...state, { color: "#fff", restorepoints }]);
+    if (options === "pencil" || options === "eraser") {
+      if (eraser) {
+        setPencilElements((state) => [...state, { color: "#fff", restorepoints }]);
+      } else {
+        setPencilElements((state) => [...state, { color, restorepoints }]);
+      }
+      setElementTypes((state) => [...state, "pencil"]);
     } else {
-      setPencilElements((state) => [...state, { color, restorepoints }]);
+      setElementTypes((state) => [...state, "shape"]);
     }
+
     setrestorePoints([]);
     setPoints([]);
+    setUndoElements([]);
+    setUndoElementTypes([]);
+    setUndoPencilElements([]);
   };
 
   const changeMode = (x) => {
@@ -428,32 +468,63 @@ export default function Home() {
   };
 
   const undoHandler = () => {
-    if (elements.length === 0) return;
-    const undoElementz = elements.pop();
-    setUndoElements((state) => [...state, undoElementz]);
-    setCurrentELements(elements);
-    setChanges(!changes);
+    const lastEle = elementTypes[elementTypes.length - 1];
+    if (lastEle === "shape") {
+      if (elements.length === 0) return;
+      const undoElementz = elements.pop();
+      setUndoElements((state) => [...state, undoElementz]);
+      setCurrentELements(elements);
+      const undoElementType = elementTypes.pop();
+      setUndoElementTypes((state) => [...state, undoElementType]);
+      setChanges(!changes);
+    }
+    if (lastEle === "pencil") {
+      if (pencilElements.length === 0) return;
+      const undoElementz = pencilElements.pop();
+      setUndoPencilElements((state) => [...state, undoElementz]);
+      setCurrentPencilELements(pencilElements);
+      const undoElementType = elementTypes.pop();
+      setUndoElementTypes((state) => [...state, undoElementType]);
+      setChanges(!changes);
+    }
 
     // elements.forEach((ele) => actualine(ele.roughEle));
     // otherUserElements.forEach((ele) => actualine(ele.roughEle));
   };
 
   const redoHandler = () => {
-    if (undoElements.length === 0) return;
-    const redoElement = undoElements.pop();
-    setElements((state) => [...state, redoElement]);
-    setCurrentELements((state) => [...state, redoElement]);
-    setChanges(!changes);
+    console.log(undoElementType);
+    const lastElementType = undoElementType[undoElementType.length - 1];
 
-    // elements.forEach((ele) => actualine(ele.roughEle));
-    // otherUserElements.forEach((ele) => actualine(ele.roughEle));
+    if (lastElementType === "shape") {
+      if (undoElements.length === 0) return;
+      const redoElement = undoElements.pop();
+      setElements((state) => [...state, redoElement]);
+      setCurrentELements((state) => [...state, redoElement]);
+      undoElementType.pop();
+      setChanges(!changes);
+    }
+    if (lastElementType === "pencil") {
+      if (undopencilElements.length === 0) return;
+      const redoElement = undopencilElements.pop();
+      setPencilElements((state) => [...state, redoElement]);
+      setCurrentPencilELements((state) => [...state, redoElement]);
+      undoElementType.pop();
+
+      setChanges(!changes);
+    }
   };
 
-  useEffect(() => {
-    if (elements > currentElements) {
-      setUndoElements([]);
-    }
-  }, [elements, currentElements]);
+  // useEffect(() => {
+  //   if (elements > currentElements) {
+  // setUndoElements([]);
+  // setUndoElementTypes([]);
+  //   }
+  //   if (pencilElements > currentPencilElements) {
+  //     setUndoPencilElements([]);
+  //     setUndoElementTypes([]);
+  //   }
+  // }, [changes]);
 
   return (
     <div className={styles.container}>
