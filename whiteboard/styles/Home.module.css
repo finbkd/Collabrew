@@ -18,11 +18,11 @@
 .canvas {
   /* margin-top: 10px; */
   /* border: 1px solid black; */
-  background-image: url("../public/images/backgroundimage.jpg");
+  /* background-image: url("../public/images/backgroundimage.jpg"); */
   height: 100vh;
   width: 100%;
   background-size: 100%;
-  image-orientation: revert-layer;
+  /* image-orientation: revert-layer; */
   z-index: 9999;
 }
 
@@ -59,4 +59,34 @@
 .chatBox {
   width: 20%;
   background-color: aliceblue;
+}
+
+.textInput {
+  padding: 5px;
+  height: 30px;
+  background-color: blanchedalmond;
+  border-radius: 8px;
+  display: flex;
+  position: fixed;
+  left: 54px;
+  top: 265px;
+  align-items: center;
+}
+
+.input {
+  height: 20px;
+  border-radius: 8px;
+}
+
+.button {
+  height: 20px;
+  background-color: burlywood;
+  border: none;
+  border-radius: 8px;
+  margin-left: 5px;
+}
+
+.leftarrow {
+  height: 12px;
+  margin-right: 5px;
 }
