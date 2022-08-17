@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from "uuid";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { socketInit } from "../context/socket";
+import { useDispatch } from "react-redux";
+import { setRoom } from "../store/roomSlice";
 
 const CreateRoom = () => {
   const socket = useRef();
@@ -20,9 +22,11 @@ const CreateRoom = () => {
   const roomIdInputJoin = useRef();
   const nameInputJoin = useRef();
 
-  useEffect(() => {
-    socket.current = socketInit();
-  }, []);
+  const dispatch = useDispatch();
+
+  // useEffect(() => {
+  //   socket.current = socketInit();
+  // }, []);
 
   const joinHandler = () => {
     let userId = uuidv4();
@@ -35,19 +39,9 @@ const CreateRoom = () => {
     }
     const roomData = { name: nameInputJoin.current.value, roomId: roomIdInputJoin.current.value, userId, host: false, presenter: false };
     setUser(roomData);
-    socket.current.emit("userJoined", roomData);
+    dispatch(setRoom({ roomData }));
     router.push(`/${roomIdInputJoin.current.value}`);
   };
-
-  useEffect(() => {
-    socket.current.on("userIsJoined", (data) => {
-      if (data.success) {
-        console.log("User Joined");
-      } else {
-        console.log("User Joined Error");
-      }
-    });
-  }, []);
 
   const generateRoomHandler = () => {
     let roomId = uuidv4();
@@ -66,7 +60,8 @@ const CreateRoom = () => {
 
     const roomData = { name: nameInput.current.value, roomId, userId, host: true, presenter: true };
     setUser(roomData);
-    socket.current.emit("userJoined", roomData);
+    // socket.current.emit("userJoined", roomData);
+    dispatch(setRoom({ roomData }));
     router.push(`/${roomId}`);
   };
 

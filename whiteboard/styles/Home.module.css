@@ -41,7 +41,13 @@
 .optionIcon {
   height: 20px;
   width: 20px;
-  padding: 2px;
+  padding: 1px;
+}
+
+.optionIcon:hover {
+  height: 21px;
+  width: 21px;
+  /* padding: 1px; */
 }
 
 .active {
@@ -89,4 +95,64 @@
 .leftarrow {
   height: 12px;
   margin-right: 5px;
+}
+
+.chatBox {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.videoContainer {
+  height: 40%;
+}
+
+.chatContainer {
+  height: 60%;
+}
+
+.chatContent {
+  height: 85%;
+  background-color: aquamarine;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 20px;
+}
+
+.chatInput {
+  width: 90%;
+}
+
+.chatInputContainer {
+  display: flex;
+}
+
+.myMessage {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.otherUserMessage {
+  display: flex;
+}
+
+.msg {
+  margin-left: 5px;
+}
+
+.ourUserVideoplayer {
+  background-color: red;
+  width: 100%;
+  height: 50%;
+}
+
+.otherUserVideoPlayer {
+  background-color: green;
+  width: 80%;
+  height: 50%;
+}
+
+.ourUserVideoplayer video {
+  width: 100%;
 }

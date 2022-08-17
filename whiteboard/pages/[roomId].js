@@ -2,18 +2,52 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { socketInit } from "../context/socket";
 import styles from "../styles/Home.module.css";
 import { HexColorPicker } from "react-colorful";
+import { useRouter } from "next/router";
+import { useSelector } from "react-redux";
 
 const pos = { x: 0, y: 0 };
 const restorePts = { a: 0, b: 0, c: 0, d: 0 };
 
 export default function Home() {
+  let Peer;
+  if (typeof navigator !== "undefined") {
+    Peer = require("peerjs").default;
+  }
+
+  const [stream, setStream] = useState();
+  const [other, setOther] = useState();
+
+  const router = useRouter();
+  const roomData = useSelector((state) => state.room.roomData);
+  const inputText = useRef();
+
+  const videoRef = useRef();
+  const othervideoRef = useRef(null);
+
+  const { roomId } = router.query;
   const socket = useRef();
   const [color, setColor] = useState("#000");
+  const [otherUser, setOtherUser] = useState("");
+  const [messages, setMessages] = useState([]);
 
   const textInputRef = useRef();
 
+  const messageHandler = () => {
+    setMessages((state) => [...state, { user: roomData.name, msg: textInputRef.current.value }]);
+    socket.current.emit("messageSend", { user: roomData.name, msg: textInputRef.current.value });
+  };
+
   useEffect(() => {
     socket.current = socketInit();
+  }, []);
+
+  useEffect(() => {
+    socket.current.emit("userJoined", roomData);
+  }, []);
+
+  useEffect(() => {
+    socket.current.on("otherUserJoined", (x) => setOtherUser(x));
+    socket.current.on("messageDelivered", (msg) => setMessages((state) => [...state, msg]));
   }, []);
 
   const [elementTypes, setElementTypes] = useState([]);
@@ -487,9 +521,6 @@ export default function Home() {
       setUndoElementTypes((state) => [...state, undoElementType]);
       setChanges(!changes);
     }
-
-    // elements.forEach((ele) => actualine(ele.roughEle));
-    // otherUserElements.forEach((ele) => actualine(ele.roughEle));
   };
 
   const redoHandler = () => {
@@ -514,17 +545,6 @@ export default function Home() {
       setChanges(!changes);
     }
   };
-
-  // useEffect(() => {
-  //   if (elements > currentElements) {
-  // setUndoElements([]);
-  // setUndoElementTypes([]);
-  //   }
-  //   if (pencilElements > currentPencilElements) {
-  //     setUndoPencilElements([]);
-  //     setUndoElementTypes([]);
-  //   }
-  // }, [changes]);
 
   return (
     <div className={styles.container}>
@@ -570,7 +590,38 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <div className={styles.chatBox}>CHAT BOX</div>
+      <div className={styles.chatBox}>
+        <div className={styles.videoContainer}>
+          <div className={styles.ourUserVideoplayer}>
+            <video autoPlay playsInline controls={false} ref={videoRef}>
+              Your browser does not support the video tag.
+            </video>
+          </div>
+          <div className={styles.otherUserVideoPlayer}>
+            <video autoPlay playsInline controls={false} ref={othervideoRef}>
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </div>
+        <div className={styles.chatContainer}>
+          {/* <div className={styles.chatHeader}>{otherUser?.name}</div> */}
+          <div className={styles.chatContent}>
+            {messages.map((msg) => {
+              return (
+                <div className={msg.user === roomData.name ? styles.myMessage : styles.otherUserMessage}>
+                  {/* {msg.user === "me" && <div>{roomData.name}</div>} */}
+                  {msg.user !== roomData.name && <div>{msg.user}: </div>}
+                  <div className={styles.msg}>{msg.msg}</div>
+                </div>
+              );
+            })}
+          </div>
+          <div className={styles.chatInputContainer}>
+            <input className={styles.chatInput} ref={textInputRef} />
+            <button onClick={messageHandler}>Send</button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
