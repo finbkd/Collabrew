@@ -4,27 +4,39 @@ const app = express();
 const server = require("http").createServer(app);
 const io = require("socket.io")(server);
 
-app.get("/", (req, res) => {
-  res.send("This is realitime mern app");
-});
-
 let roomIdGlobal;
 
 io.on("connection", (socket) => {
   console.log("User connecteddd");
+  console.log(io.sockets.adapter.rooms);
+
+  socket.on("join room", (id) => {
+    socket.to(roomIdGlobal).emit("user-joined", id);
+  });
 
   socket.on("userJoined", (roomData) => {
+    // console.log(roomData);
+    if (!roomData) return;
     const { roomId, userId } = roomData;
-    console.log(roomId);
     roomIdGlobal = roomId;
     socket.join(roomId);
-    console.log(io.sockets.adapter.rooms);
+    socket.to(roomIdGlobal).emit("otherUserJoined", roomData);
+  });
 
-    socket.emit("userIsJoined", { success: true });
+  socket.on("call the other user", (id) => {
+    socket.to(roomIdGlobal).emit("call the other user", id);
+  });
+
+  socket.on("status_online", () => {
+    socket.broadcast.emit("status_changed");
   });
 
   socket.on("drawing", (x) => {
-    socket.broadcast.emit("lineDrew", x);
+    socket.to(roomIdGlobal).emit("lineDrew", x);
+  });
+
+  socket.on("messageSend", (msg) => {
+    socket.to(roomIdGlobal).emit("messageDelivered", msg);
   });
 
   socket.on("disconnect", () => {

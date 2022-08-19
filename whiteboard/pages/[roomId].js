@@ -16,6 +16,7 @@ export default function Home() {
 
   const [stream, setStream] = useState();
   const [other, setOther] = useState();
+  const [change, setChange] = useState(false);
 
   const router = useRouter();
   const roomData = useSelector((state) => state.room.roomData);
@@ -32,9 +33,28 @@ export default function Home() {
 
   const textInputRef = useRef();
 
-  const messageHandler = () => {
+  const messageHandler = (e) => {
     setMessages((state) => [...state, { user: roomData.name, msg: textInputRef.current.value }]);
     socket.current.emit("messageSend", { user: roomData.name, msg: textInputRef.current.value });
+  };
+
+  const messageHandlerr = (e) => {
+    if (e.key === "Enter") {
+      setMessages((state) => [...state, { user: roomData.name, msg: textInputRef.current.value }]);
+      socket.current.emit("messageSend", { user: roomData.name, msg: textInputRef.current.value });
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("beforeunload", alertUser);
+    return () => {
+      window.removeEventListener("beforeunload", alertUser);
+    };
+  }, []);
+
+  const alertUser = (e) => {
+    e.preventDefault();
+    e.returnValue = "";
   };
 
   useEffect(() => {
@@ -80,6 +100,63 @@ export default function Home() {
   const canvasApi = useRef();
   const contextRef = useRef(null);
 
+  useEffect(() => {
+    canvasApi.current.width = window.innerWidth;
+    // console.log(window.innerWidth);
+    // console.log(window.innerWidth * 0.2);
+    canvasApi.current.height = window.innerHeight;
+  }, []);
+
+  useEffect(() => {
+    //* get user media
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((currentStream) => {
+      setStream(currentStream); //Get the current streaming media, and then set it to setStream state.
+      videoRef.current.srcObject = currentStream;
+      //save stream to myVideo ref, so could connect it to <video />
+    });
+  }, []);
+
+  useEffect(() => {
+    //PEER CONNECTION
+
+    const peer = new Peer();
+
+    peer.on("open", function (id) {
+      // setMe(id);
+      socket.current.emit("join room", id);
+
+      socket.current.on("user-joined", (userId) => {
+        console.log(userId);
+        setOther(userId);
+        peer.connect(userId);
+
+        peer.call(userId, stream);
+        console.log(`${userId} has been called`);
+        console.log(`${id} this is my my id`);
+        socket.current.emit("call the other user", id);
+      });
+    });
+
+    socket.current.on("call the other user", (id) => {
+      peer.call(id, stream);
+    });
+
+    peer.on("call", function (call) {
+      console.log("this peer is being called");
+      call.answer(stream);
+
+      call.on("stream", function (stream) {
+        console.log("streaming from other user");
+        // setOtherStream(stream);
+        // `stream` is the MediaStream of the remote peer.
+        othervideoRef.current.srcObject = stream;
+
+        // setOtherStream(true);
+        // Here you'd add it to an HTML video/canvas element.
+      });
+    });
+  }, [stream]);
+
   //a/ SOCKET IO FOR OTHER USER
   useEffect(() => {
     socket.current.on("lineDrew", (x) => {
@@ -89,7 +166,7 @@ export default function Home() {
       setOtherPencilElements(pencilElements);
 
       const ctx = canvasApi?.current?.getContext("2d");
-      ctx.clearRect(0, 0, 950, 450);
+      ctx.clearRect(0, 0, 1200, 1200);
 
       elements.forEach((ele) => actualine(ele.roughEle));
       otherUserElements.forEach((ele) => actualine(ele.roughEle));
@@ -120,7 +197,7 @@ export default function Home() {
   useEffect(() => {
     const ctx = canvasApi.current.getContext("2d");
     if (options === "line") {
-      ctx.clearRect(0, 0, 950, 450);
+      ctx.clearRect(0, 0, 1200, 1200);
 
       pencilElements.forEach((elee) => {
         elee.restorepoints.forEach((ele, i) => {
@@ -150,7 +227,7 @@ export default function Home() {
     }
 
     if (options === "rectangle") {
-      ctx.clearRect(0, 0, 950, 450);
+      ctx.clearRect(0, 0, 1200, 1200);
 
       pencilElements.forEach((elee) => {
         elee.restorepoints.forEach((ele, i) => {
@@ -179,7 +256,7 @@ export default function Home() {
       socket.current.emit("drawing", { elements, otherUserElements, pencilElements, otherpencilElements });
     }
     if (options === "circle") {
-      ctx.clearRect(0, 0, 950, 450);
+      ctx.clearRect(0, 0, 1200, 1200);
 
       pencilElements.forEach((elee) => {
         elee.restorepoints.forEach((ele, i) => {
@@ -208,7 +285,7 @@ export default function Home() {
       socket.current.emit("drawing", { elements, otherUserElements, pencilElements, otherpencilElements });
     }
     if (options === "text") {
-      ctx.clearRect(0, 0, 950, 450);
+      ctx.clearRect(0, 0, 1200, 1200);
 
       pencilElements.forEach((elee) => {
         elee.restorepoints.forEach((ele, i) => {
@@ -237,7 +314,7 @@ export default function Home() {
       socket.current.emit("drawing", { elements, otherUserElements, pencilElements, otherpencilElements });
     }
     if (options === "pencil") {
-      ctx.clearRect(0, 0, 950, 450);
+      ctx.clearRect(0, 0, 1200, 1200);
 
       pencilElements.forEach((elee) => {
         elee.restorepoints.forEach((ele, i) => {
@@ -547,81 +624,108 @@ export default function Home() {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.canvasContainer}>
-        <canvas className={styles.canvas} id="tutorial" ref={canvasApi} onMouseDown={startDrawing} onMouseUp={finishDrawing} onMouseMove={draw}></canvas>
-        <div className={styles.options}>
-          <div onClick={() => changeMode("line")} className={styles.option}>
-            <img className={options === "line" ? `${styles.optionIcon}   ${styles.active}` : `${styles.optionIcon}`} src="/icons/line.png" />
+    <>
+      <title>Collabrew | Online Whiteboard</title>
+      <div className={styles.container}>
+        <div className={styles.userContainer}>
+          <div>{roomData.name}</div>
+        </div>
+        <div
+          onClick={() => {
+            router.push("/");
+          }}
+          className={styles.exit}
+        >
+          <img className={`${styles.optionIcon}`} src="/icons/exit.png" />
+        </div>
+        <div className={styles.canvasContainer}>
+          <canvas className={styles.canvas} id="tutorial" ref={canvasApi} onMouseDown={startDrawing} onMouseUp={finishDrawing} onMouseMove={draw}></canvas>
+          <div className={styles.options}>
+            <div onClick={() => changeMode("line")} className={styles.option}>
+              <img className={options === "line" ? `${styles.optionIcon}   ${styles.active}` : `${styles.optionIcon}`} src="/icons/line.png" />
+            </div>
+            <div onClick={() => changeMode("rectangle")} className={styles.option}>
+              <img className={options === "rectangle" ? `${styles.optionIcon}   ${styles.active}` : `${styles.optionIcon}`} src="/icons/rectangle.png" />
+            </div>
+            <div onClick={() => changeMode("circle")} className={styles.option}>
+              <img className={options === "circle" && !eraser ? `${styles.optionIcon}   ${styles.active}` : `${styles.optionIcon}`} src="/icons/circle.png" />
+            </div>
+            <div onClick={textHandler} className={styles.option}>
+              <img className={options === "text" && !eraser ? `${styles.optionIcon}   ${styles.active}` : `${styles.optionIcon}`} src="/icons/text.png" />
+            </div>
+            {textInput && (
+              <div className={styles.textInput}>
+                <img className={styles.leftarrow} src="/icons/left.png" />
+                <input className={styles.input} ref={textInputRef} placeholder={text} />
+                <button className={styles.button} onClick={textInputHandler}>
+                  Save
+                </button>
+              </div>
+            )}
+            <div onClick={() => changeMode("pencil")} className={styles.option}>
+              <img className={options === "pencil" && !eraser ? `${styles.optionIcon}   ${styles.active}` : `${styles.optionIcon}`} src="/icons/pencil.png" />
+            </div>
+            <div className={styles.option}>
+              <img onClick={colorPicker} className={options === "color" ? `${styles.optionIcon}   ${styles.active}` : `${styles.optionIcon}`} src="/icons/color-dropper.png" />
+            </div>
+            {/* {colorPickerOption && <HexColorPicker color={color} onChange={setColor} />} */}
+            {colorPickerOption && (
+              <div className={styles.colorPicker}>
+                <img className={styles.leftarrow} src="/icons/left.png" />
+                {colorPickerOption && <HexColorPicker color={color} onChange={setColor} />}
+              </div>
+            )}
+
+            <div onClick={() => eraserHandler()} className={styles.option}>
+              <img className={options === "pencil" && eraser ? `${styles.optionIcon}   ${styles.active}` : `${styles.optionIcon}`} src="/icons/eraser.png" />
+            </div>
+            <div onClick={() => undoHandler()} className={styles.option}>
+              <img className={`${styles.optionIcon}`} src="/icons/undo.png" />
+            </div>
+            <div onClick={() => redoHandler()} className={styles.option}>
+              <img className={`${styles.optionIcon}`} src="/icons/redo.png" />
+            </div>
           </div>
-          <div onClick={() => changeMode("rectangle")} className={styles.option}>
-            <img className={options === "rectangle" ? `${styles.optionIcon}   ${styles.active}` : `${styles.optionIcon}`} src="/icons/rectangle.png" />
+        </div>
+        <div className={styles.chatBox}>
+          <div className={styles.videoContainer}>
+            <div className={styles.ourUserVideoplayer}>
+              <video autoPlay playsInline controls={false} ref={videoRef}>
+                Your browser does not support the video tag.
+              </video>
+            </div>
+            <div className={styles.otherUserVideoPlayer}>
+              <video autoPlay playsInline controls={false} ref={othervideoRef}>
+                Your browser does not support the video tag.
+              </video>
+            </div>
           </div>
-          <div onClick={() => changeMode("circle")} className={styles.option}>
-            <img className={options === "circle" && !eraser ? `${styles.optionIcon}   ${styles.active}` : `${styles.optionIcon}`} src="/icons/circle.png" />
-          </div>
-          <div onClick={textHandler} className={styles.option}>
-            <img className={options === "text" && !eraser ? `${styles.optionIcon}   ${styles.active}` : `${styles.optionIcon}`} src="/icons/text.png" />
-          </div>
-          {textInput && (
-            <div className={styles.textInput}>
-              <img className={styles.leftarrow} src="/icons/left.png" />
-              <input className={styles.input} ref={textInputRef} placeholder={text} />
-              <button className={styles.button} onClick={textInputHandler}>
-                Save
+          <div className={styles.chatContainer}>
+            {/* <div className={styles.chatHeader}>{otherUser?.name}</div> */}
+            <div className={styles.chatContent}>
+              {messages.map((msg) => {
+                return (
+                  <div className={msg.user === roomData.name ? styles.myMessage : styles.otherUserMessage}>
+                    {/* {msg.user !== roomData.name && <div className={styles.msg}>{msg.user}: </div>} */}
+                    <div className={styles.msg}>{msg.msg}</div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className={styles.chatInputContainer}>
+              <input className={styles.chatInput} ref={textInputRef} onKeyDown={messageHandlerr} />
+              <button
+                className={styles.chatBtn}
+                onClick={(e) => {
+                  messageHandler(e);
+                }}
+              >
+                <img className={`${styles.sendIcon}`} src="/icons/send.png" />
               </button>
             </div>
-          )}
-          <div onClick={() => changeMode("pencil")} className={styles.option}>
-            <img className={options === "pencil" && !eraser ? `${styles.optionIcon}   ${styles.active}` : `${styles.optionIcon}`} src="/icons/pencil.png" />
-          </div>
-          <div className={styles.option}>
-            <img onClick={colorPicker} className={options === "color" ? `${styles.optionIcon}   ${styles.active}` : `${styles.optionIcon}`} src="/icons/color-dropper.png" />
-          </div>
-          {colorPickerOption && <HexColorPicker color={color} onChange={setColor} />}
-          <div onClick={() => eraserHandler()} className={styles.option}>
-            <img className={options === "pencil" && eraser ? `${styles.optionIcon}   ${styles.active}` : `${styles.optionIcon}`} src="/icons/eraser.png" />
-          </div>
-          <div onClick={() => undoHandler()} className={styles.option}>
-            <img className={options === "pencil" && eraser ? `${styles.optionIcon}   ${styles.active}` : `${styles.optionIcon}`} src="/icons/undo.png" />
-          </div>
-          <div onClick={() => redoHandler()} className={styles.option}>
-            <img className={options === "pencil" && eraser ? `${styles.optionIcon}   ${styles.active}` : `${styles.optionIcon}`} src="/icons/redo.png" />
           </div>
         </div>
       </div>
-      <div className={styles.chatBox}>
-        <div className={styles.videoContainer}>
-          <div className={styles.ourUserVideoplayer}>
-            <video autoPlay playsInline controls={false} ref={videoRef}>
-              Your browser does not support the video tag.
-            </video>
-          </div>
-          <div className={styles.otherUserVideoPlayer}>
-            <video autoPlay playsInline controls={false} ref={othervideoRef}>
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        </div>
-        <div className={styles.chatContainer}>
-          {/* <div className={styles.chatHeader}>{otherUser?.name}</div> */}
-          <div className={styles.chatContent}>
-            {messages.map((msg) => {
-              return (
-                <div className={msg.user === roomData.name ? styles.myMessage : styles.otherUserMessage}>
-                  {/* {msg.user === "me" && <div>{roomData.name}</div>} */}
-                  {msg.user !== roomData.name && <div>{msg.user}: </div>}
-                  <div className={styles.msg}>{msg.msg}</div>
-                </div>
-              );
-            })}
-          </div>
-          <div className={styles.chatInputContainer}>
-            <input className={styles.chatInput} ref={textInputRef} />
-            <button onClick={messageHandler}>Send</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    </>
   );
 }

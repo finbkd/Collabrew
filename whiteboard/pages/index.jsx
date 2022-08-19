@@ -71,14 +71,19 @@ const CreateRoom = () => {
 
   return (
     <>
+      <title>Collabrew | Online Whiteboard</title>
       {mode === "Create" && (
         <div className={styles.pageContainer}>
+          <div className={styles.Header}>
+            Collabrew
+            <img className={`${styles.optionIcon}`} src="/icons/paint1.png" />
+          </div>
           <div className={styles.roomContainer}>
             <div className={styles.header}>Create Room</div>
             <input className={styles.input} placeholder="Enter your name" ref={nameInput} />
             <div className={styles.generate}>
               <input className={styles.input} placeholder="Generate Room code" ref={roomIdInput} value={roomIdInput?.current?.value} />
-              <button onClick={generateRoomHandler} className={styles.submit}>
+              <button onClick={generateRoomHandler} className={styles.generator}>
                 Generate
               </button>
             </div>
@@ -86,13 +91,17 @@ const CreateRoom = () => {
             <button onClick={submitHandler} className={styles.submit}>
               Create a Room
             </button>
-            <div>or</div>
-            <button onClick={() => modeHandler("Join")}>Join a room</button>
+            <div className={styles.or}>or</div>
+            <button onClick={() => modeHandler("Join")}>Join a Room</button>
           </div>
         </div>
       )}
       {mode === "Join" && (
         <div className={styles.pageContainer}>
+          <div className={styles.Header}>
+            Collabrew
+            <img className={`${styles.optionIcon}`} src="/icons/paint1.png" />
+          </div>
           <div className={styles.roomContainer}>
             <div className={styles.header}>Join Room</div>
             <input className={styles.input} placeholder="Enter your name" ref={nameInputJoin} />
@@ -100,8 +109,8 @@ const CreateRoom = () => {
             <button onClick={joinHandler} className={styles.submit}>
               Join Room
             </button>
-            <div>or</div>
-            <button onClick={() => modeHandler("Create")}>Create a room</button>
+            <div className={styles.or}>or</div>
+            <button onClick={() => modeHandler("Create")}>Create a Room</button>
           </div>
         </div>
       )}

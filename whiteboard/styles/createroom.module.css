@@ -1,21 +1,40 @@
-.pageContainer {
-  width: 100vw;
-  height: 100vh;
-  background-color: aliceblue;
-  display: flex;
-  align-items: center;
+.Header {
+  font-size: 35px;
+  font-weight: 800;
+  padding: 10px;
+  letter-spacing: 0.4px;
+  background-color: cornflowerblue;
+  color: black;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 6px black;
 }
 
 .roomContainer {
-  width: 30%;
-  height: 50%;
+  width: 25%;
+  height: 260px;
   border-radius: 8px;
   margin: 0 auto;
   border: 2px solid black;
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* justify-content: center; */
+  background-color: aliceblue;
+  box-shadow: 0 1px 10px grey;
+  /* margin-bottom: 70px; */
+}
+
+.generate {
+  display: flex;
+  flex-direction: row;
+}
+
+.optionIcon {
+  height: 32px;
+  width: 32px;
+  /* padding: 1px; */
+
+  margin-left: 2px;
 }
 
 .header {
@@ -23,12 +42,53 @@
   margin-bottom: 25px;
   font-size: 25px;
   font-weight: 800;
+  display: flex;
+}
+
+.or {
+  font-size: 12px;
+  margin-bottom: 2px;
 }
 
 .input {
   margin-bottom: 10px;
+  border-radius: 5px;
+  /* border: none; */
 }
 
 .submit {
+  margin-left: 2px;
+  height: 20px;
   background-color: cornflowerblue;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px black;
+}
+
+.generator {
+  margin-left: 2px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid black;
+}
+
+.pageContainer {
+  width: 100vw;
+  height: 100vh;
+  background-image: url("../public/images/backgroundimagee.jpg");
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+
+@media (max-width: 1000px) {
+  .roomContainer {
+    width: 40%;
+  }
+}
+@media (max-width: 700px) {
+  .roomContainer {
+    width: 73%;
+  }
 }
