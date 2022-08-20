@@ -34,14 +34,14 @@ export default function Home() {
   const textInputRef = useRef();
 
   const messageHandler = (e) => {
-    setMessages((state) => [...state, { user: roomData.name, msg: textInputRef.current.value }]);
+    setMessages((state) => [...state, { id: "a", user: roomData.name, msg: textInputRef.current.value }]);
     socket.current.emit("messageSend", { user: roomData.name, msg: textInputRef.current.value });
   };
 
   const messageHandlerr = (e) => {
     if (e.key === "Enter") {
-      setMessages((state) => [...state, { user: roomData.name, msg: textInputRef.current.value }]);
-      socket.current.emit("messageSend", { user: roomData.name, msg: textInputRef.current.value });
+      setMessages((state) => [...state, { id: "a", user: roomData.name, msg: textInputRef.current.value }]);
+      socket.current.emit("messageSend", { id: "a", user: roomData.name, msg: textInputRef.current.value });
     }
   };
 
@@ -705,7 +705,7 @@ export default function Home() {
             <div className={styles.chatContent}>
               {messages.map((msg) => {
                 return (
-                  <div className={msg.user === roomData.name ? styles.myMessage : styles.otherUserMessage}>
+                  <div key={msg.id} className={msg.user === roomData.name ? styles.myMessage : styles.otherUserMessage}>
                     {/* {msg.user !== roomData.name && <div className={styles.msg}>{msg.user}: </div>} */}
                     <div className={styles.msg}>{msg.msg}</div>
                   </div>
