@@ -628,7 +628,7 @@ export default function Home() {
       <title>Collabrew | Online Whiteboard</title>
       <div className={styles.container}>
         <div className={styles.userContainer}>
-          <div>{roomData.name}</div>
+          <div>{roomData?.name}</div>
         </div>
         <div
           onClick={() => {
@@ -705,7 +705,7 @@ export default function Home() {
             <div className={styles.chatContent}>
               {messages.map((msg) => {
                 return (
-                  <div key={msg.id} className={msg.user === roomData.name ? styles.myMessage : styles.otherUserMessage}>
+                  <div key={msg.id} className={msg.user === roomData?.name ? styles.myMessage : styles.otherUserMessage}>
                     {/* {msg.user !== roomData.name && <div className={styles.msg}>{msg.user}: </div>} */}
                     <div className={styles.msg}>{msg.msg}</div>
                   </div>
