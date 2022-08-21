@@ -30,7 +30,7 @@ const CreateRoom = () => {
 
   const joinHandler = () => {
     let userId = uuidv4();
-    userId.substring(0, 4);
+
     setUserId(userId);
     if (nameInputJoin.current.value === "") return;
     if (roomIdInputJoin.current.value === "") return;
@@ -45,7 +45,8 @@ const CreateRoom = () => {
   };
 
   const generateRoomHandler = () => {
-    let roomId = uuidv4();
+    let roomIdd = uuidv4();
+    roomId = roomIdd.substring(0, 4);
     roomIdInput.current.value = roomId;
     setRoomId(roomId);
   };
