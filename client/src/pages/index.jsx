@@ -45,8 +45,10 @@ const CreateRoom = () => {
 
   const generateRoomHandler = () => {
     let roomId = uuidv4();
-    roomIdInput.current.value = roomId;
-    setRoomId(roomId);
+    let text = roomId.substring(0, 4);
+    console.log(text);
+    roomIdInput.current.value = text;
+    setRoomId(text);
   };
 
   const submitHandler = () => {
