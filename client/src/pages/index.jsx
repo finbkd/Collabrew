@@ -44,11 +44,11 @@ const CreateRoom = () => {
   };
 
   const generateRoomHandler = () => {
-    let roomId = uuidv4();
-    let text = roomId.substring(0, 4);
-    console.log(text);
-    roomIdInput.current.value = text;
-    setRoomId(text);
+    let uuid = uuidv4();
+    let roomID = uuid.substring(0, 4);
+    // console.log(text);
+    roomIdInput.current.value = roomID;
+    setRoomId(roomID);
   };
 
   const submitHandler = () => {
@@ -84,7 +84,7 @@ const CreateRoom = () => {
             <div className={styles.header}>Create Room</div>
             <input className={styles.input} placeholder="Enter your name" ref={nameInput} />
             <div className={styles.generate}>
-              <input className={styles.input} placeholder="Generate Room code" ref={roomIdInput} value={roomIdInput?.current?.value} />
+              <input className={`${styles.input} ${styles.generateInput}`} placeholder="Generate Room code" ref={roomIdInput} value={roomIdInput?.current?.value} />
               <button onClick={generateRoomHandler} className={styles.generator}>
                 Generate
               </button>
