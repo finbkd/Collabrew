@@ -84,7 +84,7 @@ const CreateRoom = () => {
             <div className={styles.header}>Create Room</div>
             <input className={styles.input} placeholder="Enter your name" ref={nameInput} />
             <div className={styles.generate}>
-              <input className={`${styles.input} ${styles.generateInput}`} placeholder="Generate Room code" ref={roomIdInput} value={roomIdInput?.current?.value} />
+              <input className={`${styles.input} ${styles.generateInput}`} placeholder="CODE" ref={roomIdInput} value={roomIdInput?.current?.value} />
               <button onClick={generateRoomHandler} className={styles.generator}>
                 Generate
               </button>
