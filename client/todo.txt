@@ -1,0 +1,6 @@
+FIXES
+  1. switch to four digit code
+  2. Dont let user join using code through link, navigate them to front page.
+  3. navigate them to front page, if they reload.
+  4. make multi room functionality.
+

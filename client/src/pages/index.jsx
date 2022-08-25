@@ -84,7 +84,7 @@ const CreateRoom = () => {
             <div className={styles.header}>Create Room</div>
             <input className={styles.input} placeholder="Enter your name" ref={nameInput} />
             <div className={styles.generate}>
-              <input className={`${styles.input} ${styles.generateInput}`} placeholder="XXXX" ref={roomIdInput} value={roomIdInput?.current?.value} />
+              <input className={`${styles.input} ${styles.generateInput}`} placeholder="xxxx" ref={roomIdInput} value={roomIdInput?.current?.value} />
               <button onClick={generateRoomHandler} className={styles.generator}>
                 Generate
               </button>
@@ -107,7 +107,7 @@ const CreateRoom = () => {
           <div className={styles.roomContainer}>
             <div className={styles.header}>Join Room</div>
             <input className={styles.input} placeholder="Enter your name" ref={nameInputJoin} />
-            <input className={styles.input} placeholder="Enter Room code" ref={roomIdInputJoin} />
+            <input className={styles.roomInput} placeholder="Code" maxlength="4" ref={roomIdInputJoin} />
             <button onClick={joinHandler} className={styles.submit}>
               Join Room
             </button>
