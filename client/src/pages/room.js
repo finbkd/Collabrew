@@ -10,11 +10,12 @@ const pos = { x: 0, y: 0 };
 const restorePts = { a: 0, b: 0, c: 0, d: 0 };
 
 export default function Room() {
-  const navigate = useNavigate();
   let Peer;
   if (typeof navigator !== "undefined") {
     Peer = require("peerjs").default;
   }
+
+  const navigate = useNavigate();
 
   const [stream, setStream] = useState();
   const [other, setOther] = useState();
@@ -38,10 +39,10 @@ export default function Room() {
   useEffect(() => {
     const userFetch = async () => {
       if (!roomData) {
+        console.log("help");
         navigate("/");
       }
     };
-
     userFetch();
   }, []);
 
