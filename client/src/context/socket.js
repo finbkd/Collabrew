@@ -8,5 +8,7 @@ export const socketInit = () => {
     transports: ["websocket"],
   };
 
-  return io("https://collabrew.herokuapp.com/", options);
+  return io("http://localhost:5000/", options);
 };
+
+// https://collabrew.herokuapp.com/
