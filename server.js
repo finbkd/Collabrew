@@ -2,17 +2,30 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 
+import path from "path";
+import { fileURLToPath } from "url";
+
 const server = require("http").createServer(app);
 const io = require("socket.io")(server);
 
 let roomIdGlobal;
 
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static("client/build"));
-  app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
-  });
-}
+const __filename = fileURLToPath(import.meta.url);
+
+const __dirname = path.dirname(__filename);
+
+// if (process.env.NODE_ENV === "production") {
+//   app.use(express.static("client/build"));
+//   app.get("*", (req, res) => {
+//     res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
+//   });
+// }
+
+app.use(express.static(path.join(__dirname, "/client/build")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "/client/build", "index.html"));
+});
 
 io.on("connection", (socket) => {
   console.log("User connecteddd");
