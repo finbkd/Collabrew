@@ -4,7 +4,7 @@ import styles from "../styles/Home.module.css";
 import { HexColorPicker } from "react-colorful";
 import { useRouter } from "next/router";
 import { useSelector } from "react-redux";
-import { Navigate, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 const pos = { x: 0, y: 0 };
 const restorePts = { a: 0, b: 0, c: 0, d: 0 };
@@ -35,6 +35,17 @@ export default function Room() {
 
   const textInputRef = useRef();
 
+  useEffect(() => {
+    const userFetch = async () => {
+      console.log(roomData);
+      if (!roomData) {
+        navigate("/");
+      }
+    };
+
+    userFetch();
+  }, []);
+
   const messageHandler = (e) => {
     setMessages((state) => [...state, { id: "a", user: roomData.name, msg: textInputRef.current.value }]);
     socket.current.emit("messageSend", { user: roomData.name, msg: textInputRef.current.value });
@@ -47,12 +58,12 @@ export default function Room() {
     }
   };
 
-  useEffect(() => {
-    window.addEventListener("beforeunload", alertUser);
-    return () => {
-      window.removeEventListener("beforeunload", alertUser);
-    };
-  }, []);
+  // useEffect(() => {
+  //   window.addEventListener("beforeunload", alertUser);
+  //   return () => {
+  //     window.removeEventListener("beforeunload", alertUser);
+  //   };
+  // }, []);
 
   const alertUser = (e) => {
     e.preventDefault();
