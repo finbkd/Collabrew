@@ -4,7 +4,7 @@ import styles from "../styles/Home.module.css";
 import { HexColorPicker } from "react-colorful";
 import { useRouter } from "next/router";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 
 const pos = { x: 0, y: 0 };
 const restorePts = { a: 0, b: 0, c: 0, d: 0 };
@@ -39,8 +39,7 @@ export default function Room() {
   useEffect(() => {
     const userFetch = async () => {
       if (!roomData) {
-        console.log("help");
-        navigate("/");
+        navigate(`/ssss`);
       }
     };
     userFetch();
