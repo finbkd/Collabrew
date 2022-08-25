@@ -1,9 +1,10 @@
+// const url = require("url");
+
 require("dotenv").config();
 const express = require("express");
 const app = express();
 
-import path from "path";
-import { fileURLToPath } from "url";
+const path = require("path");
 
 const server = require("http").createServer(app);
 const io = require("socket.io")(server);
