@@ -37,7 +37,6 @@ export default function Room() {
 
   useEffect(() => {
     const userFetch = async () => {
-      console.log(roomData);
       if (!roomData) {
         navigate("/");
       }
