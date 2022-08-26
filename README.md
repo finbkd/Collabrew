@@ -10,7 +10,7 @@ Collabrew - An Online Collab whiteboard App
 - Communicate through Text and Video Call.
 - Get one on one realtime communicaton.
 - Features like pencil, eraser, line, circle, rectangle shapes, and text. 
-- Designed in Figma
+- Ability to Undo ,Redo, and change color of line.
 ---
 
 ## Things Learned:
