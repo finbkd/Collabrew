@@ -11,7 +11,6 @@ Collabrew - An Online Collab whiteboard App
 - Get one on one realtime communicaton.
 - Features like pencil, eraser, line, circle, rectangle shapes, and text. 
 - Designed in Figma
-- 
 ---
 
 ## Things Learned:
@@ -23,7 +22,6 @@ Collabrew - An Online Collab whiteboard App
 
 ## To Do:
 
-- 
 
 
 ---
