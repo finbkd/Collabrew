@@ -1,6 +1,6 @@
 # Collabrew
 
-VIEW LIVE: [https://collabrew.herokuapp.com/]
+VIEW LIVE: [https://collabrew.onrender.com]
 
 <!-- ![App Screenshot](/public/images/nosh-ipad.png) -->
 
